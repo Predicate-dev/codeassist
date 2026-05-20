@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 222 26% 6%;
+  --foreground: 214 32% 91%;
+  --card: 220 24% 9%;
+  --card-foreground: 214 32% 91%;
+  --popover: 220 24% 9%;
+  --popover-foreground: 214 32% 91%;
+  --primary: 165 84% 51%;
+  --primary-foreground: 222 35% 7%;
+  --secondary: 220 17% 16%;
+  --secondary-foreground: 214 32% 91%;
+  --muted: 220 16% 14%;
+  --muted-foreground: 215 15% 62%;
+  --accent: 215 92% 60%;
+  --accent-foreground: 222 35% 7%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 19% 18%;
+  --input: 217 19% 18%;
+  --ring: 165 84% 51%;
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  background: hsl(var(--background));
+}
+
+body {
+  min-height: 100vh;
+  color: hsl(var(--foreground));
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.14), transparent 30rem),
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 28rem),
+    hsl(var(--background));
+}
+
+.cm-editor {
+  height: 100%;
+  background: transparent !important;
+  font-size: 13px;
+}
+
+.cm-scroller {
+  font-family: "SFMono-Regular", "Cascadia Code", "Liberation Mono", Menlo, monospace !important;
+}
+
+.cm-gutters {
+  background: transparent !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.12) !important;
+  color: rgb(100 116 139) !important;
+}
+
+.trace-line {
+  background: rgba(20, 184, 166, 0.18) !important;
+  box-shadow: inset 3px 0 0 rgb(45 212 191);
+}
+
+.trace-line-gutter {
+  color: rgb(94 234 212) !important;
+  font-weight: 700;
+}
+
+.scan-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
