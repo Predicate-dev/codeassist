@@ -102,7 +102,7 @@ export function TraceWorkspace() {
           onSelectProblem={setSelectedProblemId}
         />
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(340px,0.9fr)_minmax(520px,1.35fr)_minmax(300px,0.8fr)]">
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(340px,0.9fr)_minmax(520px,1.35fr)_minmax(320px,0.85fr)]">
           <CodePanel problem={selectedProblem} lineNumber={player.currentStep.lineNumber} />
 
           <div className="grid min-h-0 gap-4">

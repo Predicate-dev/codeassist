@@ -72,7 +72,7 @@ export function CodePanel({ problem, lineNumber }: CodePanelProps) {
   );
 
   return (
-    <section className="flex min-h-[420px] flex-col overflow-hidden rounded-lg border border-border bg-card/80 shadow-glow xl:h-[calc(100vh-2rem)]">
+    <section className="flex min-h-[420px] flex-col overflow-hidden rounded-lg border border-border bg-card/80 shadow-glow xl:h-[calc(100vh-22rem)] xl:min-h-[560px]">
       <div className="flex items-center justify-between border-b border-border bg-secondary/40 px-4 py-3">
         <div>
           <p className="text-sm font-semibold text-foreground">{problem.title}</p>

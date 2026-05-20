@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Network, Table2, Variable } from "lucide-react";
 import type { TraceStep } from "@/lib/types";
-import { cn, formatValue, stableStringify } from "@/lib/utils";
+import { cn, compactValue, formatValue } from "@/lib/utils";
 import { valuesDiffer } from "@/lib/trace-utils";
 
 interface DynamicVisualizerProps {
@@ -87,7 +87,7 @@ function ArrayView({
 }) {
   const previousArray = Array.isArray(previous) ? previous : [];
   return (
-    <div className={cn("rounded-lg border p-3", toneForPointer(state))}>
+    <div className={cn("rounded-lg border p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]", toneForPointer(state))}>
       <div className="mb-3 flex items-center justify-between">
         <p className="font-mono text-xs font-semibold text-teal-200">{name}</p>
         <span className="text-xs text-muted-foreground">array[{value.length}]</span>
@@ -100,7 +100,7 @@ function ArrayView({
               layout
               key={`${name}-${index}`}
               className={cn(
-                "grid h-14 min-w-14 place-items-center rounded-md border border-border bg-black/20 px-2 transition-colors duration-300",
+                "flex h-14 min-w-14 flex-col items-center justify-center rounded-md border border-border bg-black/20 px-2 transition-colors duration-300",
                 changed && "border-primary bg-primary/15 text-primary"
               )}
             >
@@ -127,7 +127,7 @@ function MatrixView({
 }) {
   const previousMatrix = isMatrix(previous) ? previous : [];
   return (
-    <div className={cn("rounded-lg border p-3", toneForPointer(state))}>
+    <div className={cn("rounded-lg border p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]", toneForPointer(state))}>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Table2 className="h-4 w-4 text-primary" />
@@ -150,7 +150,7 @@ function MatrixView({
                   layout
                   key={`${name}-${rowIndex}-${columnIndex}`}
                   className={cn(
-                    "grid h-11 min-w-11 place-items-center rounded-md border border-border bg-black/20 font-mono text-sm transition-colors duration-300",
+                    "grid h-11 min-w-11 place-items-center rounded-md border border-border bg-black/20 px-2 font-mono text-sm transition-colors duration-300",
                     changed && "border-primary bg-primary/15 text-primary"
                   )}
                 >
@@ -182,7 +182,7 @@ function GraphView({
   }, {});
 
   return (
-    <div className={cn("rounded-lg border p-3", toneForPointer(state))}>
+    <div className={cn("rounded-lg border p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]", toneForPointer(state))}>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Network className="h-4 w-4 text-primary" />
@@ -247,13 +247,15 @@ function ObjectView({
   state?: "read" | "write" | "active";
 }) {
   return (
-    <div className={cn("rounded-lg border p-3", toneForPointer(state))}>
+    <div className={cn("rounded-lg border p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]", toneForPointer(state))}>
       <p className="mb-3 font-mono text-xs font-semibold text-teal-200">{name}</p>
       <div className="grid gap-2">
         {Object.entries(value).map(([key, entry]) => (
-          <div key={key} className="flex items-center justify-between rounded-md bg-black/20 px-3 py-2">
-            <span className="font-mono text-xs text-muted-foreground">{key}</span>
-            <span className="font-mono text-xs text-foreground">{stableStringify(entry)}</span>
+          <div key={key} className="flex min-w-0 items-center justify-between gap-3 rounded-md bg-black/20 px-3 py-2">
+            <span className="shrink-0 font-mono text-xs text-muted-foreground">{key}</span>
+            <span className="min-w-0 overflow-x-auto whitespace-nowrap font-mono text-xs text-foreground">
+              {compactValue(entry)}
+            </span>
           </div>
         ))}
       </div>
