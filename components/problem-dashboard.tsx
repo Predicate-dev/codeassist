@@ -36,7 +36,7 @@ export function ProblemDashboard({
             <div>
               <CardTitle>Watch Your Solutions Come Alive</CardTitle>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                TraceCode turns DSA practice into an active debugging loop: step through code,
+                CodeAssist turns DSA practice into an active debugging loop: step through code,
                 inspect every variable, and prove the next state before moving on.
               </p>
             </div>

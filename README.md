@@ -1,6 +1,6 @@
-# TraceCode
+# CodeAssist
 
-TraceCode is a small, serious attempt to make algorithm practice feel less like memorizing patterns and more like actually understanding a living program.
+CodeAssist is a small, serious attempt to make algorithm practice feel less like memorizing patterns and more like actually understanding a living program.
 
 Instead of reading a solution and hoping it sticks, you can step through real code line by line, watch variables and data structures change, and pause for prediction drills that ask: what happens next?
 
@@ -20,7 +20,7 @@ It is built as an interactive DSA workspace inspired by [tracecode.app](https://
 
 A lot of DSA learning gets flattened into “recognize the pattern, paste the template.” That can work for passing a few questions, but it often leaves the actual mental model blurry.
 
-TraceCode is meant to slow the loop down just enough for the important things to become visible:
+CodeAssist is meant to slow the loop down just enough for the important things to become visible:
 
 - Which variable changed?
 - Why did the pointer move?
@@ -70,7 +70,7 @@ npm run build
 
 ## Project Map
 
-- `app/page.tsx` renders the main TraceCode workspace.
+- `app/page.tsx` renders the main CodeAssist workspace.
 - `components/trace-workspace.tsx` coordinates problem selection, player state, drills, and progress.
 - `hooks/use-trace-player.ts` owns playback state, stepping, speed, reset, and drill checkpoint pauses.
 - `lib/types.ts` defines the trace schema and problem model.
@@ -122,4 +122,4 @@ The next good steps are:
 
 This project is intentionally not just another code runner. The goal is to make the invisible parts of execution feel tangible, and to give learners the quiet satisfaction of saying, “I knew that was going to happen.”
 
-That is the moment TraceCode is built for.
+That is the moment CodeAssist is built for.

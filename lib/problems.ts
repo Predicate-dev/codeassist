@@ -9,6 +9,10 @@ const twoSumCode = `def two_sum(nums, target):
         seen[num] = i
     return []`;
 
+const twoSumStarter = `def two_sum(nums, target):
+    # Return the indices of two numbers that add up to target.
+    pass`;
+
 const binarySearchCode = `def search(nums, target):
     low, high = 0, len(nums) - 1
     while low <= high:
@@ -21,6 +25,10 @@ const binarySearchCode = `def search(nums, target):
             high = mid - 1
     return -1`;
 
+const binarySearchStarter = `def search(nums, target):
+    # Return the index of target, or -1 if it is not present.
+    pass`;
+
 const lcsCode = `def longest_common_subsequence(text1, text2):
     m, n = len(text1), len(text2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -32,6 +40,10 @@ const lcsCode = `def longest_common_subsequence(text1, text2):
                 dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
     return dp[m][n]`;
 
+const lcsStarter = `def longest_common_subsequence(text1, text2):
+    # Return the length of the longest subsequence common to both strings.
+    pass`;
+
 const fibonacciCode = `def fib(n):
     if n <= 1:
         return n
@@ -40,6 +52,10 @@ const fibonacciCode = `def fib(n):
     for i in range(2, n + 1):
         dp[i] = dp[i - 1] + dp[i - 2]
     return dp[n]`;
+
+const fibonacciStarter = `def fib(n):
+    # Return the nth Fibonacci number.
+    pass`;
 
 const courseScheduleCode = `def can_finish(num_courses, prerequisites):
     graph = {i: [] for i in range(num_courses)}
@@ -57,6 +73,10 @@ const courseScheduleCode = `def can_finish(num_courses, prerequisites):
             if indegree[nxt] == 0:
                 queue.append(nxt)
     return visited == num_courses`;
+
+const courseScheduleStarter = `def can_finish(num_courses, prerequisites):
+    # Return True if every course can be completed.
+    pass`;
 
 export const problems: AlgorithmicProblem[] = [
   {
@@ -157,9 +177,28 @@ export const problems: AlgorithmicProblem[] = [
       }
     ],
     drillCheckpoints: [
+      { stepIndex: 1, promptType: "line", target: "lineNumber", choices: ["2", "3", "4", "7"] },
       { stepIndex: 3, promptType: "variable", target: "need", choices: ["7", "2", "9", "undefined"] },
+      { stepIndex: 5, promptType: "variable", target: "seen[2]", choices: ["0", "1", "2", "undefined"] },
+      { stepIndex: 6, promptType: "variable", target: "num", choices: ["2", "7", "11", "15"] },
       { stepIndex: 7, promptType: "line", target: "lineNumber", choices: ["5", "6", "7", "8"] }
-    ]
+    ],
+    practice: {
+      functionName: "two_sum",
+      starterCode: twoSumStarter,
+      prompt: "Return the indices of the two values whose sum equals target.",
+      constraints: ["Exactly one valid answer exists in the sample set.", "Each input value may be used at most once."],
+      hints: [
+        "A hash map can remember values you have already scanned.",
+        "At each index, compute the complement before storing the current number.",
+        "Return as soon as the complement already exists in memory."
+      ],
+      sampleTests: [
+        { id: "two-sum-1", name: "classic pair", input: { args: [[2, 7, 11, 15], 9] }, expected: [0, 1] },
+        { id: "two-sum-2", name: "middle pair", input: { args: [[3, 2, 4], 6] }, expected: [1, 2] },
+        { id: "two-sum-3", name: "duplicate values", input: { args: [[3, 3], 6] }, expected: [0, 1] }
+      ]
+    }
   },
   {
     id: "binary-search",
@@ -259,9 +298,28 @@ export const problems: AlgorithmicProblem[] = [
       }
     ],
     drillCheckpoints: [
+      { stepIndex: 1, promptType: "variable", target: "high", choices: ["4", "5", "6", "11"] },
       { stepIndex: 3, promptType: "variable", target: "mid", choices: ["2", "3", "4", "5"] },
-      { stepIndex: 5, promptType: "line", target: "lineNumber", choices: ["8", "9", "10", "11"] }
-    ]
+      { stepIndex: 5, promptType: "line", target: "lineNumber", choices: ["8", "9", "10", "11"] },
+      { stepIndex: 6, promptType: "variable", target: "low", choices: ["0", "2", "3", "5"] },
+      { stepIndex: 8, promptType: "variable", target: "mid", choices: ["3", "4", "5", "9"] }
+    ],
+    practice: {
+      functionName: "search",
+      starterCode: binarySearchStarter,
+      prompt: "Find target in a sorted array in logarithmic time.",
+      constraints: ["The input array is sorted in ascending order.", "Return -1 when target is absent."],
+      hints: [
+        "Keep a closed interval from low to high.",
+        "Move low right when nums[mid] is too small.",
+        "Move high left when nums[mid] is too large."
+      ],
+      sampleTests: [
+        { id: "binary-1", name: "found target", input: { args: [[1, 3, 5, 7, 9, 11], 9] }, expected: 4 },
+        { id: "binary-2", name: "missing target", input: { args: [[1, 3, 5, 7, 9, 11], 6] }, expected: -1 },
+        { id: "binary-3", name: "single item", input: { args: [[8], 8] }, expected: 0 }
+      ]
+    }
   },
   {
     id: "lcs",
@@ -393,9 +451,28 @@ export const problems: AlgorithmicProblem[] = [
       }
     ],
     drillCheckpoints: [
+      { stepIndex: 1, promptType: "variable", target: "n", choices: ["2", "3", "4", "undefined"] },
+      { stepIndex: 2, promptType: "variable", target: "dp[0][0]", choices: ["0", "1", "2", "undefined"] },
       { stepIndex: 5, promptType: "variable", target: "dp[1][1]", choices: ["0", "1", "2", "undefined"] },
+      { stepIndex: 9, promptType: "variable", target: "dp[1][2]", choices: ["0", "1", "2", "3"] },
       { stepIndex: 12, promptType: "variable", target: "dp[3][2]", choices: ["1", "2", "3", "0"] }
-    ]
+    ],
+    practice: {
+      functionName: "longest_common_subsequence",
+      starterCode: lcsStarter,
+      prompt: "Return the length of the longest subsequence shared by two strings.",
+      constraints: ["Characters must stay in order.", "Subsequences do not need to be contiguous."],
+      hints: [
+        "Use a table where dp[i][j] means the best answer for prefixes text1[:i] and text2[:j].",
+        "Matching characters extend the diagonal cell.",
+        "Non-matching characters take the best value from left or above."
+      ],
+      sampleTests: [
+        { id: "lcs-1", name: "shared ac", input: { args: ["abc", "ac"] }, expected: 2 },
+        { id: "lcs-2", name: "full overlap", input: { args: ["abc", "abc"] }, expected: 3 },
+        { id: "lcs-3", name: "no overlap", input: { args: ["abc", "def"] }, expected: 0 }
+      ]
+    }
   },
   {
     id: "fibonacci",
@@ -511,9 +588,29 @@ export const problems: AlgorithmicProblem[] = [
       }
     ],
     drillCheckpoints: [
+      { stepIndex: 2, promptType: "variable", target: "dp[1]", choices: ["0", "1", "2", "undefined"] },
+      { stepIndex: 4, promptType: "variable", target: "i", choices: ["1", "2", "3", "5"] },
       { stepIndex: 6, promptType: "variable", target: "dp[3]", choices: ["1", "2", "3", "5"] },
+      { stepIndex: 9, promptType: "variable", target: "dp[4]", choices: ["2", "3", "4", "5"] },
       { stepIndex: 10, promptType: "variable", target: "dp[5]", choices: ["3", "4", "5", "8"] }
-    ]
+    ],
+    practice: {
+      functionName: "fib",
+      starterCode: fibonacciStarter,
+      prompt: "Return the nth Fibonacci number.",
+      constraints: ["fib(0) is 0.", "fib(1) is 1.", "Prefer an iterative or memoized solution."],
+      hints: [
+        "Handle n <= 1 before building a table.",
+        "Every later value depends on the two previous values.",
+        "A list works, but two rolling variables are enough."
+      ],
+      sampleTests: [
+        { id: "fib-1", name: "base zero", input: { args: [0] }, expected: 0 },
+        { id: "fib-2", name: "base one", input: { args: [1] }, expected: 1 },
+        { id: "fib-3", name: "fifth value", input: { args: [5] }, expected: 5 },
+        { id: "fib-4", name: "seventh value", input: { args: [7] }, expected: 13 }
+      ]
+    }
   },
   {
     id: "course-schedule",
@@ -653,10 +750,30 @@ export const problems: AlgorithmicProblem[] = [
       }
     ],
     drillCheckpoints: [
+      { stepIndex: 1, promptType: "variable", target: "graph[0]", choices: ["[]", "[1]", "[1,2]", "[3]"] },
+      { stepIndex: 4, promptType: "variable", target: "graph[0]", choices: ["[]", "[1]", "[2]", "[1,2]"] },
       { stepIndex: 5, promptType: "variable", target: "indegree[1]", choices: ["0", "1", "2", "3"] },
+      { stepIndex: 7, promptType: "variable", target: "queue", choices: ["[]", "[0]", "[1,2]", "[3]"] },
+      { stepIndex: 10, promptType: "variable", target: "visited", choices: ["0", "1", "2", "4"] },
       { stepIndex: 11, promptType: "variable", target: "queue", choices: ["[]", "[0]", "[1,2]", "[3]"] },
       { stepIndex: 14, promptType: "variable", target: "visited", choices: ["2", "3", "4", "true"] }
-    ]
+    ],
+    practice: {
+      functionName: "can_finish",
+      starterCode: courseScheduleStarter,
+      prompt: "Return whether all courses can be completed from prerequisite pairs.",
+      constraints: ["Each pair [course, prerequisite] means prerequisite must be completed first.", "A cycle makes completion impossible."],
+      hints: [
+        "Build a directed graph from prerequisite to course.",
+        "Track indegree counts to know which courses are available.",
+        "A topological traversal succeeds only if you visit every course."
+      ],
+      sampleTests: [
+        { id: "course-1", name: "topological success", input: { args: [4, [[1, 0], [2, 0], [3, 1], [3, 2]]] }, expected: true },
+        { id: "course-2", name: "simple cycle", input: { args: [2, [[1, 0], [0, 1]]] }, expected: false },
+        { id: "course-3", name: "no prerequisites", input: { args: [3, []] }, expected: true }
+      ]
+    }
   }
 ];
 

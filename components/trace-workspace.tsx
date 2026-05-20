@@ -6,6 +6,7 @@ import { CodePanel } from "@/components/code-panel";
 import { DrillModal } from "@/components/drill-modal";
 import { DynamicVisualizer } from "@/components/dynamic-visualizer";
 import { ExecutionControls } from "@/components/execution-controls";
+import { PracticeConsole } from "@/components/practice-console";
 import { ProblemDashboard } from "@/components/problem-dashboard";
 import { SidebarTracker } from "@/components/sidebar-tracker";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import { useTracePlayer } from "@/hooks/use-trace-player";
 import { getProblemById, problems } from "@/lib/problems";
 import type { DrillAttempt } from "@/lib/types";
 
-const STORAGE_KEY = "tracecode.drillAttempts.v1";
+const STORAGE_KEY = "codeassist.drillAttempts.v1";
 
 export function TraceWorkspace() {
   const [selectedProblemId, setSelectedProblemId] = useState(problems[0].id);
@@ -80,7 +81,7 @@ export function TraceWorkspace() {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-semibold tracking-tight">TraceCode</h1>
+                <h1 className="text-lg font-semibold tracking-tight">CodeAssist</h1>
                 <Badge variant="secondary">interactive DSA lab</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -128,6 +129,8 @@ export function TraceWorkspace() {
 
           <SidebarTracker currentStep={player.currentStep} />
         </div>
+
+        <PracticeConsole problem={selectedProblem} />
       </div>
 
       <DrillModal

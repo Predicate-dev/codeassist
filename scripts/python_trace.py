@@ -80,7 +80,7 @@ def run_trace(payload):
 
     globals_scope = {"__builtins__": SAFE_BUILTINS}
     locals_scope = {}
-    compiled = compile(source, "<tracecode-user>", "exec")
+    compiled = compile(source, "<codeassist-user>", "exec")
     exec(compiled, globals_scope, locals_scope)
     function = locals_scope.get(function_name) or globals_scope.get(function_name)
     if not callable(function):
@@ -140,9 +140,79 @@ def run_trace(payload):
     return trace[:400]
 
 
+def normalize_args(raw_input):
+    if isinstance(raw_input, dict) and "args" in raw_input:
+        return raw_input["args"]
+    if isinstance(raw_input, list):
+        return [raw_input]
+    return [raw_input]
+
+
+def load_function(source, requested_name=None):
+    default_name = validate_code(source)
+    function_name = requested_name or default_name
+    globals_scope = {"__builtins__": SAFE_BUILTINS}
+    locals_scope = {}
+    compiled = compile(source, "<codeassist-user>", "exec")
+    exec(compiled, globals_scope, locals_scope)
+    function = locals_scope.get(function_name) or globals_scope.get(function_name)
+    if not callable(function):
+        raise ValueError(f"Function {function_name!r} was not found.")
+    return function_name, function
+
+
+def run_tests(payload):
+    source = payload["code"]
+    _function_name, function = load_function(source, payload.get("functionName"))
+    tests = payload.get("tests", [])
+    if not isinstance(tests, list):
+        raise ValueError("tests must be a list.")
+
+    results = []
+    for index, test in enumerate(tests[:20]):
+        name = test.get("name") or f"Case {index + 1}"
+        expected = to_jsonable(test.get("expected"))
+        stdout_buffer = io.StringIO()
+        try:
+            args = normalize_args(test.get("input", {}))
+            with redirect_stdout(stdout_buffer):
+                actual = function(*args)
+            normalized_actual = to_jsonable(actual)
+            results.append(
+                {
+                    "id": test.get("id") or f"case-{index + 1}",
+                    "name": name,
+                    "passed": normalized_actual == expected,
+                    "input": to_jsonable(test.get("input", {})),
+                    "expected": expected,
+                    "actual": normalized_actual,
+                    "stdout": stdout_buffer.getvalue().splitlines(),
+                    "error": None,
+                }
+            )
+        except Exception as exc:
+            results.append(
+                {
+                    "id": test.get("id") or f"case-{index + 1}",
+                    "name": name,
+                    "passed": False,
+                    "input": to_jsonable(test.get("input", {})),
+                    "expected": expected,
+                    "actual": None,
+                    "stdout": stdout_buffer.getvalue().splitlines(),
+                    "error": str(exc),
+                }
+            )
+
+    return results
+
+
 def main():
     try:
         payload = json.loads(sys.stdin.read())
+        if payload.get("mode") == "tests":
+            print(json.dumps({"results": run_tests(payload)}))
+            return
         print(json.dumps({"trace": run_trace(payload)}))
     except Exception as exc:
         print(json.dumps({"trace": [], "error": str(exc), "details": traceback.format_exc()}))

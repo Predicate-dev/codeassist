@@ -14,6 +14,24 @@ export interface DrillCheckpoint {
   choices?: string[];
 }
 
+export interface PracticeTestCase {
+  id: string;
+  name: string;
+  input: {
+    args: unknown[];
+  };
+  expected: unknown;
+}
+
+export interface PracticeConfig {
+  functionName: string;
+  starterCode: string;
+  sampleTests: PracticeTestCase[];
+  prompt: string;
+  constraints: string[];
+  hints: string[];
+}
+
 export interface AlgorithmicProblem {
   id: string;
   title: string;
@@ -23,6 +41,7 @@ export interface AlgorithmicProblem {
   language: "python" | "java" | "javascript";
   fullTrace: TraceStep[];
   drillCheckpoints: DrillCheckpoint[];
+  practice: PracticeConfig;
 }
 
 export interface DrillAttempt {

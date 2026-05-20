@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TraceCode",
+  title: "CodeAssist",
   description:
     "Step through algorithms line-by-line, watch state mutate, and drill your predictions."
 };
