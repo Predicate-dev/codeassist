@@ -16,6 +16,7 @@ It is built as an interactive DSA workspace inspired by [tracecode.app](https://
 - Tracks drill attempts locally so the dashboard can show accuracy and topic progress.
 - Includes a Blind 75 practice catalog at `/practice`, with one coding workspace per question.
 - Provides a LeetCode-style practice console with sample tests, custom JSON tests, and guided code assists.
+- Gives every Blind 75 problem an algorithm logic visualizer with flow, state model, dry run, complexity, and answer pseudocode.
 - Includes a small Python `sys.settrace` harness for generating trace steps from sandboxed function snippets.
 
 ## Why This Exists
@@ -40,7 +41,7 @@ That last question is the heart of the product. Prediction is where passive read
 - Shadcn-style local UI primitives
 - CodeMirror for read-only code display
 - Framer Motion for state transitions
-- Python trace harness through a Next.js API route
+- Python trace harness through local Next.js API routes and Vercel Python Functions
 
 ## Getting Started
 
@@ -83,10 +84,17 @@ npm run build
 - `app/practice/page.tsx` lists all Blind 75 questions by topic.
 - `app/practice/[id]/page.tsx` opens an individual coding workspace.
 - `components/practice-console.tsx` provides the editable code runner, tests, and assist panel.
+- `components/algorithm-visualizer.tsx` renders the answer-logic visualization on every Blind 75 coding page.
 - `lib/blind75.ts` contains the Blind 75 catalog and JSON-friendly sample tests.
 - `scripts/python_trace.py` generates trace snapshots from Python code using `sys.settrace`.
-- `app/api/trace/route.ts` exposes the trace harness through a server route.
-- `app/api/run/route.ts` runs practice-console test cases through the same constrained Python harness.
+- `api/python/run.py` and `api/python/trace.py` expose the Python harness on Vercel's Python runtime.
+- `app/api/run/route.ts` and `app/api/trace/route.ts` keep the local `npm run dev` runner working when `python3` is installed.
+
+## Deploying On Vercel
+
+The editable practice console runs Python code. On a laptop, the local Next.js route can spawn `python3`. On Vercel, Node Functions do not guarantee a `python3` executable, so CodeAssist routes hosted executions through `/api/python/run`, a Vercel Python Function.
+
+If you see `spawn python3 ENOENT`, redeploy with the `api/python/*.py` files included. For local development, install Python 3 or set `PYTHON_BIN` to your Python executable before running `npm run dev`.
 
 ## Trace Schema
 
@@ -107,13 +115,7 @@ The app is designed to work beautifully from precompiled traces first. The Pytho
 
 ## Current Problems
 
-- Two Sum
-- Binary Search
-- Longest Common Subsequence
-- Fibonacci DP
-- Course Schedule
-
-Each problem includes a code snippet, a full execution trace, and prediction checkpoints.
+The home workspace includes hand-authored trace labs for Two Sum, Binary Search, Longest Common Subsequence, Fibonacci DP, and Course Schedule. The `/practice` workspace includes all Blind 75 questions with starter code, sample tests, custom tests, guided hints, and algorithm visualizers.
 
 ## Product Direction
 

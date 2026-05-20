@@ -14,7 +14,8 @@ interface RunRequestBody {
 function runPythonTests(body: RunRequestBody): Promise<unknown[]> {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(process.cwd(), "scripts", "python_trace.py");
-    const child = spawn("python3", [scriptPath], {
+    const pythonBinary = process.env.PYTHON_BIN ?? "python3";
+    const child = spawn(pythonBinary, [scriptPath], {
       stdio: ["pipe", "pipe", "pipe"],
       env: {
         ...process.env,
@@ -38,8 +39,12 @@ function runPythonTests(body: RunRequestBody): Promise<unknown[]> {
       stderr += chunk.toString();
     });
 
-    child.on("error", (error) => {
+    child.on("error", (error: NodeJS.ErrnoException) => {
       clearTimeout(timeout);
+      if (error.code === "ENOENT") {
+        reject(new Error("Python runner unavailable. On Vercel, use the /api/python/run Python Function instead of spawning python3 from a Node Function."));
+        return;
+      }
       reject(error);
     });
 

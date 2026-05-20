@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { AlgorithmVisualizer } from "@/components/algorithm-visualizer";
 import { PracticeConsole } from "@/components/practice-console";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,20 +42,26 @@ export default async function PracticeProblemPage({ params }: PracticeProblemPag
                 every Blind 75 problem can be practiced directly in the browser.
               </p>
             </div>
-            <Button asChild variant="outline">
-              <a
-                href={`https://leetcode.com/problems/${problem.leetcodeSlug}/`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink className="h-4 w-4" />
-                LeetCode
-              </a>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="secondary">
+                <a href="#logic-visualizer">Visualize logic</a>
+              </Button>
+              <Button asChild variant="outline">
+                <a
+                  href={`https://leetcode.com/problems/${problem.leetcodeSlug}/`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  LeetCode
+                </a>
+              </Button>
+            </div>
           </div>
         </header>
 
         <PracticeConsole problem={problem} />
+        <AlgorithmVisualizer problem={problem} />
       </div>
     </main>
   );

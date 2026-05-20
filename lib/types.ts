@@ -32,12 +32,35 @@ export interface PracticeConfig {
   hints: string[];
 }
 
+export interface AlgorithmVisualization {
+  pattern: string;
+  summary: string;
+  state: {
+    name: string;
+    purpose: string;
+  }[];
+  flow: {
+    title: string;
+    detail: string;
+  }[];
+  dryRun: {
+    label: string;
+    value: unknown;
+  }[];
+  complexity: {
+    time: string;
+    space: string;
+  };
+  answerPseudocode: string[];
+}
+
 export interface PracticeConsoleProblem {
   id: string;
   title: string;
   difficulty: "Easy" | "Medium" | "Hard";
   category: string;
   practice: PracticeConfig;
+  visualization?: AlgorithmVisualization;
 }
 
 export interface AlgorithmicProblem {

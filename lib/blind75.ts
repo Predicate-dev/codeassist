@@ -1,4 +1,4 @@
-import type { PracticeConfig, PracticeTestCase } from "@/lib/types";
+import type { AlgorithmVisualization, PracticeConfig, PracticeTestCase } from "@/lib/types";
 
 export interface Blind75Problem {
   id: string;
@@ -7,6 +7,7 @@ export interface Blind75Problem {
   category: string;
   leetcodeSlug: string;
   practice: PracticeConfig;
+  visualization: AlgorithmVisualization;
 }
 
 type ProblemSeed = {
@@ -30,10 +31,319 @@ const defaultHints = [
   "Run the sample, then add one edge case that would break a shallow solution."
 ];
 
+const categoryVisuals: Record<
+  string,
+  Pick<AlgorithmVisualization, "pattern" | "state" | "flow" | "complexity" | "answerPseudocode">
+> = {
+  "Arrays & Hashing": {
+    pattern: "Hash-backed lookup",
+    state: [
+      { name: "index / item", purpose: "The current element being inspected." },
+      { name: "memory", purpose: "A set or dictionary that makes prior values searchable." },
+      { name: "answer", purpose: "The grouped, counted, or matched result built from memory." }
+    ],
+    flow: [
+      { title: "Normalize the input", detail: "Decide what key represents the thing you are searching or grouping by." },
+      { title: "Scan once", detail: "Update memory while preserving enough information to answer immediately." },
+      { title: "Resolve from memory", detail: "Return the match, grouping, count, or derived array once the invariant is satisfied." }
+    ],
+    complexity: { time: "Usually O(n)", space: "Usually O(n)" },
+    answerPseudocode: ["create memory", "for each item in input: update or query memory", "return the result described by memory"]
+  },
+  "Two Pointers": {
+    pattern: "Converging pointers",
+    state: [
+      { name: "left", purpose: "Tracks the lower or earlier candidate." },
+      { name: "right", purpose: "Tracks the upper or later candidate." },
+      { name: "best", purpose: "Stores the best valid answer seen while pointers move." }
+    ],
+    flow: [
+      { title: "Prepare order", detail: "Sort or clean the input when the pointer logic depends on order." },
+      { title: "Compare both ends", detail: "Use the current pair to update the answer or decide which side is impossible." },
+      { title: "Move one pointer", detail: "Discard the side that cannot improve the answer." }
+    ],
+    complexity: { time: "O(n) after any sorting", space: "O(1) besides output" },
+    answerPseudocode: ["left = start, right = end", "while left < right: evaluate pair", "move the pointer that cannot help anymore"]
+  },
+  "Sliding Window": {
+    pattern: "Elastic window",
+    state: [
+      { name: "left / right", purpose: "Bounds of the current candidate window." },
+      { name: "counts", purpose: "Frequencies or requirements inside the window." },
+      { name: "best", purpose: "The best valid window length or substring so far." }
+    ],
+    flow: [
+      { title: "Expand right", detail: "Include a new element and update window state." },
+      { title: "Repair validity", detail: "Move left while the current window violates the rule." },
+      { title: "Record best", detail: "When valid, update the best length, score, or substring." }
+    ],
+    complexity: { time: "O(n)", space: "O(k) for tracked symbols" },
+    answerPseudocode: ["for right in range(n): add input[right]", "while window invalid: remove input[left]; left += 1", "update answer from current window"]
+  },
+  Stack: {
+    pattern: "Last-in, first-out matching",
+    state: [
+      { name: "stack", purpose: "Stores unresolved opening symbols or candidates." },
+      { name: "current", purpose: "The token currently being matched." },
+      { name: "valid", purpose: "Whether every close has matched the latest open." }
+    ],
+    flow: [
+      { title: "Push opens", detail: "When a new unresolved item appears, put it on top." },
+      { title: "Match closes", detail: "A close must match and remove the most recent open." },
+      { title: "Finish empty", detail: "A valid sequence leaves no unresolved items." }
+    ],
+    complexity: { time: "O(n)", space: "O(n)" },
+    answerPseudocode: ["for token in input: push opens, pop matching closes", "if mismatch: return False", "return stack is empty"]
+  },
+  "Binary Search": {
+    pattern: "Halving a sorted decision space",
+    state: [
+      { name: "low / high", purpose: "The remaining candidate range." },
+      { name: "mid", purpose: "The probe that splits the search space." },
+      { name: "condition", purpose: "The comparison that tells which half survives." }
+    ],
+    flow: [
+      { title: "Choose mid", detail: "Probe the center of the current range." },
+      { title: "Classify half", detail: "Use sortedness or monotonicity to identify the impossible half." },
+      { title: "Shrink range", detail: "Move low or high until the target or boundary is found." }
+    ],
+    complexity: { time: "O(log n)", space: "O(1)" },
+    answerPseudocode: ["while low <= high: mid = center", "if mid satisfies answer: return/update", "discard the impossible half"]
+  },
+  "Linked List": {
+    pattern: "Pointer rewiring",
+    state: [
+      { name: "prev / curr", purpose: "The local links currently being rewired." },
+      { name: "fast / slow", purpose: "Used to find middles, cycles, or offset positions." },
+      { name: "dummy", purpose: "Simplifies edge cases at the head." }
+    ],
+    flow: [
+      { title: "Protect the head", detail: "Use a dummy or previous pointer when head might change." },
+      { title: "Walk carefully", detail: "Advance pointers while preserving the next node before rewiring." },
+      { title: "Reconnect", detail: "Return the new head or transformed value order." }
+    ],
+    complexity: { time: "O(n)", space: "O(1) or O(n) for heap/output variants" },
+    answerPseudocode: ["keep references before changing links", "move pointers in a deliberate order", "return the transformed list representation"]
+  },
+  Trees: {
+    pattern: "Recursive tree decisions",
+    state: [
+      { name: "node", purpose: "The current subtree root." },
+      { name: "left / right", purpose: "Results returned from child subtrees." },
+      { name: "bounds / best", purpose: "Extra context carried through recursion." }
+    ],
+    flow: [
+      { title: "Handle empty subtree", detail: "Return the base value for null children." },
+      { title: "Ask children", detail: "Recursively compute what each child contributes." },
+      { title: "Combine", detail: "Use child results and current value to return the parent answer." }
+    ],
+    complexity: { time: "O(n)", space: "O(h) recursion stack" },
+    answerPseudocode: ["def dfs(node): handle empty", "left = dfs(node.left); right = dfs(node.right)", "combine child answers with node"]
+  },
+  Tries: {
+    pattern: "Prefix tree traversal",
+    state: [
+      { name: "node", purpose: "The trie node for the current prefix." },
+      { name: "children", purpose: "Edges to next characters." },
+      { name: "word flag", purpose: "Marks whether a full word ends here." }
+    ],
+    flow: [
+      { title: "Insert characters", detail: "Create child nodes as each character extends the prefix." },
+      { title: "Traverse query", detail: "Follow existing child edges for each character." },
+      { title: "Resolve wildcard/prefix", detail: "Return based on word flags or DFS through wildcard branches." }
+    ],
+    complexity: { time: "O(L) per word/query, plus wildcard branching", space: "O(total characters)" },
+    answerPseudocode: ["walk characters from root", "create or follow child nodes", "use terminal flags to answer searches"]
+  },
+  "Heap / Priority Queue": {
+    pattern: "Two-heap balance",
+    state: [
+      { name: "small heap", purpose: "Keeps the lower half." },
+      { name: "large heap", purpose: "Keeps the upper half." },
+      { name: "balance", purpose: "Ensures median is at one or two heap tops." }
+    ],
+    flow: [
+      { title: "Insert into a side", detail: "Place the new value into the appropriate half." },
+      { title: "Rebalance", detail: "Move heap tops until sizes differ by at most one." },
+      { title: "Read median", detail: "Use one heap top or average both tops." }
+    ],
+    complexity: { time: "O(log n) insert, O(1) median", space: "O(n)" },
+    answerPseudocode: ["push number into one heap", "rebalance sizes and ordering", "median comes from heap tops"]
+  },
+  Backtracking: {
+    pattern: "Choice tree search",
+    state: [
+      { name: "path", purpose: "The partial answer currently being explored." },
+      { name: "remaining", purpose: "What still needs to be matched or summed." },
+      { name: "visited", purpose: "Prevents reusing invalid cells or choices." }
+    ],
+    flow: [
+      { title: "Choose", detail: "Add one candidate to the current path." },
+      { title: "Explore", detail: "Recurse while the partial answer is still valid." },
+      { title: "Undo", detail: "Remove the choice so sibling branches start clean." }
+    ],
+    complexity: { time: "Exponential in branch depth", space: "O(depth)" },
+    answerPseudocode: ["def dfs(state): if complete, record answer", "for choice in choices: choose, dfs, undo", "prune invalid branches early"]
+  },
+  Graphs: {
+    pattern: "Graph traversal",
+    state: [
+      { name: "visited", purpose: "Prevents revisiting nodes or cells." },
+      { name: "frontier", purpose: "Stack, queue, or recursion boundary." },
+      { name: "component/result", purpose: "Aggregates the traversal outcome." }
+    ],
+    flow: [
+      { title: "Build or read neighbors", detail: "Know how each node reaches adjacent nodes." },
+      { title: "Traverse frontier", detail: "Use BFS/DFS to visit reachable nodes." },
+      { title: "Aggregate", detail: "Count components, mark reachability, or detect cycles." }
+    ],
+    complexity: { time: "O(V + E) or O(rows * cols)", space: "O(V) visited/frontier" },
+    answerPseudocode: ["for each start node/cell: if unseen, traverse", "mark every reachable neighbor", "update count or validity from traversal"]
+  },
+  "Advanced Graphs": {
+    pattern: "Topological ordering",
+    state: [
+      { name: "edges", purpose: "Ordering constraints between symbols or nodes." },
+      { name: "indegree / visiting", purpose: "Detects whether a node is ready or cyclic." },
+      { name: "order", purpose: "The final valid topological order." }
+    ],
+    flow: [
+      { title: "Derive constraints", detail: "Compare adjacent words or prerequisites to create directed edges." },
+      { title: "Detect cycles", detail: "Use indegrees or DFS states to reject impossible orderings." },
+      { title: "Emit order", detail: "Append nodes only after their dependencies are satisfied." }
+    ],
+    complexity: { time: "O(total input size + edges)", space: "O(nodes + edges)" },
+    answerPseudocode: ["build directed constraints", "topologically process nodes", "return order only if every node is placed"]
+  },
+  "1-D Dynamic Programming": {
+    pattern: "Linear recurrence",
+    state: [
+      { name: "dp[i]", purpose: "Best answer for the prefix or position ending at i." },
+      { name: "previous states", purpose: "Earlier answers used to compute the current one." },
+      { name: "best", purpose: "Optional global best across all positions." }
+    ],
+    flow: [
+      { title: "Define dp meaning", detail: "Make dp[i] a sentence before writing transitions." },
+      { title: "Seed bases", detail: "Fill the first one or two answers directly." },
+      { title: "Transition forward", detail: "Compute each state from smaller states." }
+    ],
+    complexity: { time: "Usually O(n) or O(n * choices)", space: "O(n), often reducible" },
+    answerPseudocode: ["define base cases", "for i in range(...): dp[i] = recurrence", "return final or best dp value"]
+  },
+  "2-D Dynamic Programming": {
+    pattern: "Grid/table recurrence",
+    state: [
+      { name: "dp[row][col]", purpose: "Best answer for two prefixes or a grid position." },
+      { name: "top / left / diagonal", purpose: "Neighboring states that feed the transition." },
+      { name: "base row/column", purpose: "Empty-prefix or boundary answers." }
+    ],
+    flow: [
+      { title: "Define cell meaning", detail: "Each cell should answer a smaller version of the problem." },
+      { title: "Initialize boundaries", detail: "Fill zero row/column or first grid edge." },
+      { title: "Fill table", detail: "Use neighboring cells to compute the current answer." }
+    ],
+    complexity: { time: "O(rows * cols)", space: "O(rows * cols), sometimes compressible" },
+    answerPseudocode: ["create dp table", "initialize boundaries", "for each cell: combine neighbors", "return target cell"]
+  },
+  Greedy: {
+    pattern: "Local choice with invariant",
+    state: [
+      { name: "current", purpose: "The running score, reach, or interval state." },
+      { name: "best", purpose: "The best answer preserved so far." },
+      { name: "invariant", purpose: "Why the local choice remains safe." }
+    ],
+    flow: [
+      { title: "Track only what matters", detail: "Keep the smallest state that summarizes the past." },
+      { title: "Make local update", detail: "Choose the local action that preserves the invariant." },
+      { title: "Commit best", detail: "Update the answer without revisiting previous choices." }
+    ],
+    complexity: { time: "O(n)", space: "O(1)" },
+    answerPseudocode: ["initialize current and best", "for each item: update current by invariant", "return best/reachability"]
+  },
+  Intervals: {
+    pattern: "Sorted interval sweep",
+    state: [
+      { name: "current interval", purpose: "The interval being merged or compared." },
+      { name: "end", purpose: "The active boundary that decides overlap." },
+      { name: "result/removals", purpose: "Merged intervals or count of discarded overlaps." }
+    ],
+    flow: [
+      { title: "Sort by start", detail: "Make overlap decisions local and monotonic." },
+      { title: "Compare boundaries", detail: "Overlap exists when the next start is before the active end." },
+      { title: "Merge or count", detail: "Extend the active interval or record a removal/room." }
+    ],
+    complexity: { time: "O(n log n)", space: "O(n) for output or heap" },
+    answerPseudocode: ["sort intervals", "scan and compare next.start with active end", "merge, count, or allocate resources"]
+  },
+  "Math & Geometry": {
+    pattern: "Boundary simulation",
+    state: [
+      { name: "bounds", purpose: "Top/bottom/left/right or layer boundaries." },
+      { name: "position", purpose: "The current cell being transformed or read." },
+      { name: "result", purpose: "The transformed matrix or traversal order." }
+    ],
+    flow: [
+      { title: "Choose representation", detail: "Decide whether to mutate layers or build a returned matrix/list." },
+      { title: "Move by boundary", detail: "Traverse or rotate one layer/direction at a time." },
+      { title: "Tighten bounds", detail: "After finishing a layer, move inward." }
+    ],
+    complexity: { time: "O(rows * cols)", space: "O(1) in-place or O(output)" },
+    answerPseudocode: ["set boundaries/layers", "process one direction or ring", "shrink boundaries and repeat"]
+  },
+  "Bit Manipulation": {
+    pattern: "Bitwise state transitions",
+    state: [
+      { name: "bits", purpose: "The current binary representation being inspected." },
+      { name: "mask/carry", purpose: "Isolates or moves bit information." },
+      { name: "answer", purpose: "The accumulated integer or count." }
+    ],
+    flow: [
+      { title: "Inspect low bits", detail: "Use shifts, masks, or xor to read/update one bit at a time." },
+      { title: "Apply identity", detail: "Use properties like n & (n - 1), xor cancellation, or carry propagation." },
+      { title: "Accumulate", detail: "Build the count, reversed value, or missing number." }
+    ],
+    complexity: { time: "O(1) for fixed 32-bit integers or O(n)", space: "O(1) besides output" },
+    answerPseudocode: ["initialize answer", "while bits/items remain: apply bit identity", "return accumulated value"]
+  }
+};
+
 function starterCode(functionName: string, args: string, prompt: string) {
   return `def ${functionName}(${args}):
     # ${prompt}
     pass`;
+}
+
+function makeVisualization(seed: ProblemSeed, sampleTests: PracticeTestCase[]): AlgorithmVisualization {
+  const base = categoryVisuals[seed.category] ?? categoryVisuals["Arrays & Hashing"];
+  const sample = sampleTests[0];
+
+  return {
+    pattern: base.pattern,
+    summary: `${seed.title} is best understood as a ${base.pattern.toLowerCase()} problem: ${seed.prompt}`,
+    state: base.state,
+    flow: [
+      {
+        title: "Read the contract",
+        detail: `Inputs enter as (${seed.args}). The function must produce ${JSON.stringify(seed.expected)} for the sample shape.`
+      },
+      ...base.flow,
+      {
+        title: "Return the contract value",
+        detail: `Return exactly what ${seed.functionName} promises, not just an intermediate helper state.`
+      }
+    ],
+    dryRun: [
+      { label: "sample input", value: sample.input.args },
+      { label: "target output", value: sample.expected },
+      { label: "key invariant", value: seed.hints?.[0] ?? base.flow[0].detail }
+    ],
+    complexity: base.complexity,
+    answerPseudocode: [
+      `def ${seed.functionName}(${seed.args}):`,
+      ...base.answerPseudocode.map((line) => `  ${line}`),
+      "  return answer"
+    ]
+  };
 }
 
 function makeProblem(seed: ProblemSeed): Blind75Problem {
@@ -62,7 +372,8 @@ function makeProblem(seed: ProblemSeed): Blind75Problem {
       ],
       hints: seed.hints ?? defaultHints,
       sampleTests
-    }
+    },
+    visualization: makeVisualization(seed, sampleTests)
   };
 }
 

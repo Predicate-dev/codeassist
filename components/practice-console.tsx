@@ -32,6 +32,12 @@ interface RunResult {
   error: string | null;
 }
 
+interface RunRequestPayload {
+  code: string;
+  functionName: string;
+  tests: PracticeTestCase[];
+}
+
 interface PracticeConsoleProps {
   problem: PracticeConsoleProblem;
 }
@@ -126,6 +132,39 @@ function parseCustomTests(raw: string): PracticeTestCase[] {
       expected: record.expected
     };
   });
+}
+
+async function readRunnerPayload(response: Response) {
+  try {
+    return (await response.json()) as { results?: RunResult[]; error?: string };
+  } catch {
+    return { error: `Runner returned ${response.status} instead of JSON.` };
+  }
+}
+
+async function postRunRequest(payload: RunRequestPayload): Promise<RunResult[]> {
+  const endpoints = ["/api/python/run", "/api/run"];
+
+  for (const endpoint of endpoints) {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.status === 404 && endpoint !== endpoints[endpoints.length - 1]) {
+      continue;
+    }
+
+    const runnerPayload = await readRunnerPayload(response);
+    if (!response.ok || runnerPayload.error) {
+      throw new Error(runnerPayload.error ?? "Runner failed.");
+    }
+
+    return runnerPayload.results ?? [];
+  }
+
+  throw new Error("No code runner endpoint is available.");
 }
 
 export function PracticeConsole({ problem }: PracticeConsoleProps) {
@@ -229,20 +268,12 @@ export function PracticeConsole({ problem }: PracticeConsoleProps) {
       : problem.practice.sampleTests;
 
     try {
-      const response = await fetch("/api/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code,
-          functionName: problem.practice.functionName,
-          tests
-        })
-      });
-      const payload = (await response.json()) as { results?: RunResult[]; error?: string };
-      if (!response.ok || payload.error) {
-        throw new Error(payload.error ?? "Runner failed.");
-      }
-      setResults(payload.results ?? []);
+      const payload = {
+        code,
+        functionName: problem.practice.functionName,
+        tests
+      };
+      setResults(await postRunRequest(payload));
     } catch (error) {
       setRunnerError(error instanceof Error ? error.message : "Unable to run tests.");
     } finally {
@@ -372,11 +403,18 @@ export function PracticeConsole({ problem }: PracticeConsoleProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     Test Results
                   </p>
-                  {results.length ? (
-                    <Badge variant={passingCount === results.length ? "default" : "danger"}>
-                      {passingCount}/{results.length} passing
-                    </Badge>
-                  ) : null}
+                  <div className="flex items-center gap-2">
+                    {results.length ? (
+                      <>
+                        <Button asChild size="sm" variant="secondary">
+                          <a href="#logic-visualizer">Review logic</a>
+                        </Button>
+                        <Badge variant={passingCount === results.length ? "default" : "danger"}>
+                          {passingCount}/{results.length} passing
+                        </Badge>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
 
                 {isRunning ? (
@@ -472,6 +510,12 @@ export function PracticeConsole({ problem }: PracticeConsoleProps) {
                   <div className="grid gap-2">
                     <Button
                       variant="secondary"
+                      asChild
+                    >
+                      <a href="#logic-visualizer">Visualize answer logic</a>
+                    </Button>
+                    <Button
+                      variant="outline"
                       onClick={() => insertSnippet(getScaffoldSnippet(problem))}
                     >
                       Insert approach scaffold
