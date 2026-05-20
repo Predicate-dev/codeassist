@@ -32,6 +32,14 @@ export interface PracticeConfig {
   hints: string[];
 }
 
+export interface PracticeConsoleProblem {
+  id: string;
+  title: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  category: string;
+  practice: PracticeConfig;
+}
+
 export interface AlgorithmicProblem {
   id: string;
   title: string;

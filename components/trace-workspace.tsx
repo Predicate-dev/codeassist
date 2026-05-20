@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Braces, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Braces, ListChecks, Sparkles } from "lucide-react";
 import { CodePanel } from "@/components/code-panel";
 import { DrillModal } from "@/components/drill-modal";
 import { DynamicVisualizer } from "@/components/dynamic-visualizer";
@@ -10,6 +11,7 @@ import { PracticeConsole } from "@/components/practice-console";
 import { ProblemDashboard } from "@/components/problem-dashboard";
 import { SidebarTracker } from "@/components/sidebar-tracker";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useTracePlayer } from "@/hooks/use-trace-player";
 import { getProblemById, problems } from "@/lib/problems";
@@ -94,6 +96,12 @@ export function TraceWorkspace() {
             <span className="text-sm font-medium">Drill Mode</span>
             <Switch checked={drillMode} onCheckedChange={setDrillMode} aria-label="Toggle drill mode" />
           </div>
+          <Button asChild variant="outline">
+            <Link href="/practice">
+              <ListChecks className="h-4 w-4" />
+              Blind 75
+            </Link>
+          </Button>
         </header>
 
         <ProblemDashboard

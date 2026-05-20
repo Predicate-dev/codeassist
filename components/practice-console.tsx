@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { AlgorithmicProblem, PracticeTestCase } from "@/lib/types";
+import type { PracticeConsoleProblem, PracticeTestCase } from "@/lib/types";
 import { cn, compactValue } from "@/lib/utils";
 
 interface RunResult {
@@ -33,14 +33,14 @@ interface RunResult {
 }
 
 interface PracticeConsoleProps {
-  problem: AlgorithmicProblem;
+  problem: PracticeConsoleProblem;
 }
 
 function storageKey(problemId: string) {
   return `codeassist.practice.${problemId}.code`;
 }
 
-function getApproach(problem: AlgorithmicProblem) {
+function getApproach(problem: PracticeConsoleProblem) {
   switch (problem.id) {
     case "two-sum":
       return "Scan once with a hash map. For each number, compute the complement first; if it is already in the map, return that saved index and the current index.";
@@ -53,11 +53,11 @@ function getApproach(problem: AlgorithmicProblem) {
     case "course-schedule":
       return "Use topological sorting. Build edges from prerequisite to course, queue zero-indegree courses, and count how many courses you can remove.";
     default:
-      return "Start from the state variables shown in the trace, then translate each state transition into code.";
+      return problem.practice.hints[0] ?? "Start with the input shape, name the state you need, and make each branch easy to test.";
   }
 }
 
-function getScaffoldSnippet(problem: AlgorithmicProblem) {
+function getScaffoldSnippet(problem: PracticeConsoleProblem) {
   switch (problem.id) {
     case "two-sum":
       return `    seen = {}
@@ -83,11 +83,11 @@ function getScaffoldSnippet(problem: AlgorithmicProblem) {
     indegree = [0] * num_courses
     # build edges, queue zero-indegree courses, and count visits`;
     default:
-      return "    # Translate the trace state transitions into code here.";
+      return "    # Sketch the state you need here, then run the sample tests.";
   }
 }
 
-function customTestTemplate(problem: AlgorithmicProblem) {
+function customTestTemplate(problem: PracticeConsoleProblem) {
   const firstSample = problem.practice.sampleTests[0];
   return JSON.stringify(
     [

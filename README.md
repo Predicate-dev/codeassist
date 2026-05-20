@@ -14,6 +14,8 @@ It is built as an interactive DSA workspace inspired by [tracecode.app](https://
 - Offers media-player controls for stepping, playback, speed, reset, and timeline progress.
 - Includes Drill Mode, which pauses at checkpoints and asks the learner to predict the next state.
 - Tracks drill attempts locally so the dashboard can show accuracy and topic progress.
+- Includes a Blind 75 practice catalog at `/practice`, with one coding workspace per question.
+- Provides a LeetCode-style practice console with sample tests, custom JSON tests, and guided code assists.
 - Includes a small Python `sys.settrace` harness for generating trace steps from sandboxed function snippets.
 
 ## Why This Exists
@@ -78,8 +80,13 @@ npm run build
 - `components/code-panel.tsx` renders read-only CodeMirror with active line highlighting.
 - `components/dynamic-visualizer.tsx` adapts raw variable snapshots into visual blocks, tables, and graphs.
 - `components/drill-modal.tsx` handles prediction prompts and remediation feedback.
+- `app/practice/page.tsx` lists all Blind 75 questions by topic.
+- `app/practice/[id]/page.tsx` opens an individual coding workspace.
+- `components/practice-console.tsx` provides the editable code runner, tests, and assist panel.
+- `lib/blind75.ts` contains the Blind 75 catalog and JSON-friendly sample tests.
 - `scripts/python_trace.py` generates trace snapshots from Python code using `sys.settrace`.
 - `app/api/trace/route.ts` exposes the trace harness through a server route.
+- `app/api/run/route.ts` runs practice-console test cases through the same constrained Python harness.
 
 ## Trace Schema
 
